@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>顔認証・拡張ハブシステム</title>
+    <style>
+        body { text-align: center; font-family: sans-serif; }
+        video { border: 2px solid #ccc; border-radius: 8px; margin-top: 20px; }
+        #status { font-size: 24px; font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Face Data Hub</h1>
+    <div id="status">カメラを起動中...</div>
+    
+    <!-- カメラ映像を表示する場所 -->
+    <video id="webcam" autoplay muted playsinline></video>
+
+    <!-- スクリプトの読み込み（順番が大事！） -->
+    <script src="js/FaceDataHub.js"></script>
+    <script src="js/features/smileDetector.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
