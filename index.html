@@ -1,27 +1,52 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>顔認証・拡張ハブシステム</title>
+    <!-- ...前回のまま... -->
     <style>
-        body { text-align: center; font-family: sans-serif; }
-        video { border: 2px solid #ccc; border-radius: 8px; margin-top: 20px; }
-        #status { font-size: 24px; font-weight: bold; margin-top: 10px; }
+        body { text-align: center; font-family: sans-serif; background-color: #f0f2f5; }
+        #status { font-size: 24px; font-weight: bold; margin: 20px 0; min-height: 1.2em;}
+        
+        /* 【追加】ビデオとキャンバスを重ねるためのコンテナ */
+        .video-container {
+            position: relative; /* 子要素の基準になる */
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border-radius: 10px;
+            overflow: hidden; /* 角丸からはみ出た映像を隠す */
+        }
+
+        /* ビデオの設定 */
+        video {
+            display: block; /* 下の隙間をなくす */
+        }
+
+        /* 【追加】キャンバスの設定。ビデオの上に完全に重ねる */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none; /* クリックなどのイベントをビデオに透過させる */
+        }
     </style>
 </head>
 <body>
-    <h1>Face Data Hub</h1>
-    <div id="status">カメラを起動中...</div>
+    <h1>Face Data Hub AI</h1>
+    <div id="status">AIモデルを読み込み中...</div>
     
-    <!-- カメラ映像を表示する場所 -->
-    <video id="webcam" autoplay muted playsinline></video>
+    <!-- 【変更】divで囲み、canvasを追加 -->
+    <div class="video-container">
+        <video id="webcam" autoplay muted playsinline width="640" height="480"></video>
+        <!-- AIが描画するための透明なキャンバス -->
+        <canvas id="overlay"></canvas>
+    </div>
 
-    <!-- スクリプトの読み込み（順番が大事！） -->
+    <!-- スクリプトの読み込み -->
     <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-
-    <!-- 2. 自分のスクリプト群 -->
     <script defer src="js/FaceDataHub.js"></script>
+    
+    <!-- 【追加】描画用の新しい拡張機能 -->
+    <script defer src="js/features/faceCanvasDraw.js"></script>
+    
     <script defer src="js/features/smileDetector.js"></script>
     <script defer src="js/main.js"></script>
 </body>
