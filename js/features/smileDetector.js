@@ -1,12 +1,13 @@
-// ハブに「笑顔を判定して画面の文字を変える機能」を追加
 window.hub.addFeature((faceData) => {
     const statusDiv = document.getElementById('status');
     
-    // （※この段階ではまだAIが入っていないので、main.jsから送られてくるモックデータを使います）
-    if (faceData.mockSmileScore > 0.8) {
+    // 本物のAIが判定した笑顔スコア（0.0 〜 1.0）を受け取る
+    const score = faceData.smileScore;
+
+    if (score > 0.8) {
         statusDiv.innerText = "😊 素晴らしい笑顔です！";
         statusDiv.style.color = "green";
-    } else if (faceData.mockSmileScore > 0.4) {
+    } else if (score > 0.4) {
         statusDiv.innerText = "🙂 微笑んでいますね";
         statusDiv.style.color = "orange";
     } else {
