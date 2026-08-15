@@ -18,8 +18,11 @@
     <video id="webcam" autoplay muted playsinline></video>
 
     <!-- スクリプトの読み込み（順番が大事！） -->
-    <script src="js/FaceDataHub.js"></script>
-    <script src="js/features/smileDetector.js"></script>
-    <script src="js/main.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+    <!-- 2. 自分のスクリプト群 -->
+    <script defer src="js/FaceDataHub.js"></script>
+    <script defer src="js/features/smileDetector.js"></script>
+    <script defer src="js/main.js"></script>
 </body>
 </html>
