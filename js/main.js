@@ -1,4 +1,5 @@
 const video = document.getElementById('webcam');
+const statusDiv = document.getElementById('status');
 
 // 1. AIモデルを読み込んでからカメラを起動する
 Promise.all([
@@ -14,8 +15,10 @@ async function startVideo() {
             video: { width: 640, height: 480 } 
         });
         video.srcObject = stream;
+        statusDiv.innerText = "カメラ起動成功！顔を映してください。";
     } catch (err) {
         console.error("カメラエラー:", err);
+        statusDiv.innerText = "カメラのアクセスを許可してください";
     }
 }
 
@@ -30,17 +33,28 @@ video.addEventListener('play', () => {
             new faceapi.TinyFaceDetectorOptions()
         ).withFaceExpressions();
 
-        // 顔が見つかった時だけハブにデータを送る
+        // 顔が見つかった場合
         if (detections) {
-            // face-apiは detections.expressions に { happy: 0.98, sad: 0.01... } のようなデータを入れています
             const currentFaceData = {
                 timestamp: Date.now(),
-                smileScore: detections.expressions.happy, // 「happy」の数値を笑顔スコアとして抽出
-                allExpressions: detections.expressions    // 今後の拡張のために全ての感情も入れておく
+                
+                // 描画機能などで使えるよう、AIの生の戻り値をそのまま入れる
+                rawDetections: detections,
+
+                // （これまでの互換性のために残しておく）
+                smileScore: detections.expressions.happy,
+                allExpressions: detections.expressions
             };
 
             // ハブに本物のデータを中継！
             window.hub.updateData(currentFaceData);
+        } else {
+            // 顔が映っていない時は、キャンバスをクリアしたり
+            // テキストをリセットするために空のデータ（nullや0）を送る
+            window.hub.updateData({ 
+                rawDetections: null, 
+                smileScore: 0 
+            });
         }
     }, 100); 
 });
