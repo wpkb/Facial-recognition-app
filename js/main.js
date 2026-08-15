@@ -1,6 +1,13 @@
 const video = document.getElementById('webcam');
 
-// 1. Webカメラを起動する関数
+// 1. AIモデルを読み込んでからカメラを起動する
+Promise.all([
+    // 顔の場所を見つける軽量モデル
+    faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+    // 表情（笑顔、怒りなど）を判定するモデル
+    faceapi.nets.faceExpressionNet.loadFromUri('/models')
+]).then(startVideo);
+
 async function startVideo() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -8,34 +15,32 @@ async function startVideo() {
         });
         video.srcObject = stream;
     } catch (err) {
-        console.error("カメラの起動に失敗:", err);
-        document.getElementById('status').innerText = "カメラのアクセスを許可してください";
+        console.error("カメラエラー:", err);
     }
 }
 
-// 2. 映像を分析して、ハブにデータを送り続けるループ
-function processVideo() {
-    // 【重要】ここで将来的に face-api.js などのAIを使って「本当の顔データ」を抽出します。
-    // 今回はベーステストとして、ランダムな数値を生成してハブに送ります。
-    
-    const currentFaceData = {
-        timestamp: Date.now(),
-        // 0.0 〜 1.0 のランダムな数値を「ダミーの笑顔スコア」として生成
-        mockSmileScore: Math.random() 
-    };
-
-    // ハブにデータを送信！（ここから自動で smileDetector.js などに中継される）
-    window.hub.updateData(currentFaceData);
-
-    // 次のフレーム（少し待ってから）再び自分自身を呼び出してループさせる
-    // ※デモ用に少しゆっくり（1秒に2回）回しています
-    setTimeout(processVideo, 500); 
-}
-
-// 3. 動画の再生が始まったら、分析ループをスタート
+// 2. 動画の再生が始まったらAI分析をスタート
 video.addEventListener('play', () => {
-    processVideo();
-});
+    
+    // 0.1秒ごとに顔をスキャンし続ける
+    setInterval(async () => {
+        // AIに映像を渡して、顔の枠と表情(expressions)を抽出！
+        const detections = await faceapi.detectSingleFace(
+            video, 
+            new faceapi.TinyFaceDetectorOptions()
+        ).withFaceExpressions();
 
-// アプリ起動
-startVideo();
+        // 顔が見つかった時だけハブにデータを送る
+        if (detections) {
+            // face-apiは detections.expressions に { happy: 0.98, sad: 0.01... } のようなデータを入れています
+            const currentFaceData = {
+                timestamp: Date.now(),
+                smileScore: detections.expressions.happy, // 「happy」の数値を笑顔スコアとして抽出
+                allExpressions: detections.expressions    // 今後の拡張のために全ての感情も入れておく
+            };
+
+            // ハブに本物のデータを中継！
+            window.hub.updateData(currentFaceData);
+        }
+    }, 100); 
+});
